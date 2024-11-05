@@ -1,6 +1,7 @@
 from step3_train_and_save_models import load_model_and_encoder
 from config import ( MODEL_DECISION_TREE, MODEL_LOGISTICS_REGRESSION,
-                    MODEL_SGDClassifier, MODEL_SVC, SAVED_DIR
+                    MODEL_SGDCLASSIFIER, MODEL_SVC,MODEL_MLPCLASSIFIER,
+                    MODEL_VOTINGCLASSIFIER, SAVED_DIR
 )
 
 if __name__ == '__main__':
@@ -41,11 +42,10 @@ if __name__ == '__main__':
     print("y_predict=",y_predict,
           "\ny_predict_proba=",y_predict_proba,
           "\ny_predict_log_proba",y_predict_log_proba,
-      #     "\ny_feature_importance=",y_feature_importance
     )
     
     print("################SGDClassifier####################")
-    model = MODEL_SGDClassifier
+    model = MODEL_SGDCLASSIFIER
     saved_model_path = SAVED_DIR / (model + '.pkl')
     loaded_model,loaded_encoder  = load_model_and_encoder(saved_model_path)
     
@@ -61,7 +61,6 @@ if __name__ == '__main__':
     print("y_predict=",y_predict,
           "\ny_predict_proba=",y_predict_proba,
           "\ny_predict_log_proba",y_predict_log_proba,
-      #     "\ny_feature_importance=",y_feature_importance
     )
 
     print("################SVC####################")
@@ -81,5 +80,42 @@ if __name__ == '__main__':
     print("y_predict=",y_predict,
           "\ny_predict_proba=",y_predict_proba,
           "\ny_predict_log_proba",y_predict_log_proba,
-      #     "\ny_feature_importance=",y_feature_importance
+    )
+
+    print("################MLPClassifier####################")
+    model = MODEL_MLPCLASSIFIER
+    saved_model_path = SAVED_DIR / (model + '.pkl')
+    loaded_model,loaded_encoder  = load_model_and_encoder(saved_model_path)
+    
+    new_data = [[75,'Crizol','plastic','Cathy','-3 to 0'],]
+    
+    X_encoded = loaded_encoder.transform(new_data) # X_encoded= [[1. 0. 0. 2. 1.]]
+    print("X_encoded=",X_encoded)
+    
+    y_predict = loaded_model.predict(X_encoded)
+    y_predict_proba = loaded_model.predict_proba(X_encoded)
+    y_predict_log_proba = -loaded_model.predict_log_proba(X_encoded)
+#     y_feature_importance = loaded_model.feature_importances_ # does not exist
+    print("y_predict=",y_predict,
+          "\ny_predict_proba=",y_predict_proba,
+          "\ny_predict_log_proba",y_predict_log_proba,
+    )
+    
+    print("################VotingClassifier####################")
+    model = MODEL_VOTINGCLASSIFIER
+    saved_model_path = SAVED_DIR / (model + '.pkl')
+    loaded_model,loaded_encoder  = load_model_and_encoder(saved_model_path)
+    
+    new_data = [[75,'Crizol','plastic','Cathy','-3 to 0'],]
+    
+    X_encoded = loaded_encoder.transform(new_data) # X_encoded= [[1. 0. 0. 2. 1.]]
+    print("X_encoded=",X_encoded)
+    
+    y_predict = loaded_model.predict(X_encoded)
+    y_predict_proba = loaded_model.predict_proba(X_encoded)
+#     y_predict_log_proba = -loaded_model.predict_log_proba(X_encoded) # does not exist
+#     y_feature_importance = loaded_model.feature_importances_ # does not exist
+    print("y_predict=",y_predict,
+          "\ny_predict_proba=",y_predict_proba,
+          "\ny_predict_log_proba",y_predict_log_proba,
     )

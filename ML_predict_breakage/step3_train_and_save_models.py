@@ -2,17 +2,19 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import train_test_split
+
 from  pathlib import Path
 import pickle
 
 from step1_data_collection import collect_data
 from step2_data_preprocessing import preprocess_data
-
 from config import (MODEL_DECISION_TREE, 
                     MODEL_LOGISTICS_REGRESSION,
-                    MODEL_SGDClassifier,
-                    MODEL_SVC, 
+                    MODEL_SGDCLASSIFIER,
+                    MODEL_SVC, MODEL_MLPCLASSIFIER,
+                    MODEL_VOTINGCLASSIFIER,
                     SAVED_DIR
 )
 RANDOM_STATE = 42
@@ -24,10 +26,20 @@ def train_and_score_model(X, y, model: str):
         classifier = DecisionTreeClassifier(max_depth=2, random_state=RANDOM_STATE)
     elif model == MODEL_LOGISTICS_REGRESSION:
         classifier = LogisticRegression(random_state=RANDOM_STATE)
-    elif model == MODEL_SGDClassifier:
+    elif model == MODEL_SGDCLASSIFIER: #TODO ...results were not satisfactory. FIX IT.
         classifier = SGDClassifier(loss="modified_huber",random_state=RANDOM_STATE)
     elif model == MODEL_SVC:
         classifier = SVC(probability=True,random_state=RANDOM_STATE)
+    elif model == MODEL_MLPCLASSIFIER:
+        classifier = MLPClassifier(random_state=RANDOM_STATE)
+    elif model == MODEL_VOTINGCLASSIFIER:
+        estim = [('dt',DecisionTreeClassifier(max_depth=2, random_state=RANDOM_STATE)),
+                 ('lr',LogisticRegression(random_state=RANDOM_STATE)),
+                 ('svc',SVC(probability=True,random_state=RANDOM_STATE)),
+                 ('mlp',MLPClassifier(random_state=RANDOM_STATE)),            
+        ]        
+        classifier = VotingClassifier(estimators=estim, voting="soft")
+        
     else:
         classifier = None    
     
@@ -67,7 +79,7 @@ if __name__ == '__main__':
     loaded_model,loaded_encoder = load_model_and_encoder(saved_model_path)
     
     ################SGDClassifier####################
-    model = MODEL_SGDClassifier
+    model = MODEL_SGDCLASSIFIER
     saved_model_path = SAVED_DIR / (model + '.pkl')
     train_model, train_score = train_and_score_model(X,y,model=model)
     print("SGDClassifier train_score=",train_score)
@@ -79,6 +91,22 @@ if __name__ == '__main__':
     saved_model_path = SAVED_DIR / (model + '.pkl')
     train_model, train_score = train_and_score_model(X,y,model=model)
     print("SVC train_score=",train_score)
+    save_model_and_encoder(train_model, saved_model_path,encoder=encoder)
+    loaded_model,loaded_encoder = load_model_and_encoder(saved_model_path)
+    
+    ################MLPClassifier####################
+    model = MODEL_MLPCLASSIFIER
+    saved_model_path = SAVED_DIR / (model + '.pkl')
+    train_model, train_score = train_and_score_model(X,y,model=model)
+    print("MLPClassifier train_score=",train_score)
+    save_model_and_encoder(train_model, saved_model_path,encoder=encoder)
+    loaded_model,loaded_encoder = load_model_and_encoder(saved_model_path)
+    
+    ################VotingClassifier####################
+    model = MODEL_VOTINGCLASSIFIER
+    saved_model_path = SAVED_DIR / (model + '.pkl')
+    train_model, train_score = train_and_score_model(X,y,model=model)
+    print("VotingClassifier train_score=",train_score)
     save_model_and_encoder(train_model, saved_model_path,encoder=encoder)
     loaded_model,loaded_encoder = load_model_and_encoder(saved_model_path)
     

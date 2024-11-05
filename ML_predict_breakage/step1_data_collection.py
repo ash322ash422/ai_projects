@@ -1,13 +1,10 @@
 from libraries import *
 from faker import Faker
-from config import SAVED_DIR, DATA_FILENAME
-
-FILE_PATH = SAVED_DIR / DATA_FILENAME
+from config import DATA_FILEPATH
 
 fake = Faker()
 
-# Function to generate 1,000 records
-def generate_and_save_data(num_records=1000):
+def generate_and_save_data_to_csv(num_records=1000):
     data = []
     
     # Define the choices for each categorical field
@@ -47,16 +44,15 @@ def generate_and_save_data(num_records=1000):
         data.append(record)
     
     df = pd.DataFrame(data)
-    df.to_csv(FILE_PATH, index=False)
-    # return df
-
+    df.to_csv(DATA_FILEPATH, index=False)
+    
 def collect_data():
-    df = pd.read_csv(FILE_PATH)
+    df = pd.read_csv(DATA_FILEPATH)
     return df
 
 if __name__ == '__main__':
     
-    # generate_and_save_data(num_records=100) #uncomment when data needs to be generated
+    # generate_and_save_data_to_csv(num_records=100) #uncomment when data needs to be generated
     
     df_records = collect_data()
     print(df_records.head())
