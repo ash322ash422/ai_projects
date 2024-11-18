@@ -1,0 +1,8 @@
+-  call db.schema.visualization
+
+##############################
+Some recommendation queries:
+
+1) MATCH (a:Actor{name:"Eric Campbell"})-[:ACTED_IN]->(m:Movie) return *
+
+This return all the movies that are related(=ACTED_IN) to Actor="Eric Campbell"
