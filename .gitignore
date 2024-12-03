@@ -17,7 +17,11 @@ keys*
 README.secret
 README.furtive
 config.py
-
+*.mhtml
+*original*
+*ORIGINAL*
+#do not load models
+*.pt
 db.sqlite3
 
 *.mmdb
@@ -27,3 +31,5 @@ db.sqlite3
 *.jpeg
 *.mp3
 *.gif
+
+*.mp4

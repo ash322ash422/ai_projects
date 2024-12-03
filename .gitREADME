@@ -7,3 +7,13 @@ steps
   - git commit -m "Initial commit"
   - git push -u origin master
 
+#####################
+1) I added *.mhtml in .gitignore:
+
+2) > git rm --cached *.mhtml
+The --cached option removes the files from the Git index but retains them in your working directory 
+
+3) > git commit -m "Exclude .mhtml files as per updated .gitignore"
+
+4) > git push origin master
+#####################
