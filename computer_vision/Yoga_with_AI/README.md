@@ -1,6 +1,6 @@
 # INSTRUCTIONS
 
-I used python3.11. Package requirements for this project: mediapipe, scikit-learn. You can run this by downloading following 3 files: step2_yoga_pose_detection_correction_video.py, downward_dog.mp4 and pose_classifier.p
+I used python3.11. Package requirements for this project: mediapipe, scikit-learn. You can run this by downloading following 3 files: step2_yoga_pose_detection_correction_video.py, downward_dog.mp4 and pose_classifier.p The demo video is in result.mp4 
 
 # MY THOUGHT PROCESS
 
