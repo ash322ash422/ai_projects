@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 video_path = 'downward_dog.mp4' 
+pose_classifier_path = "pose_classifier.p"
 
 def pose_correction(landmarks, mp_pose):#TODO More condition can be added here
     correct_pose=""
@@ -51,7 +52,7 @@ def calculateAngle(landmark1, landmark2, landmark3):
 
 def load_classifier():
     # Load the trained classifier
-    with open('pose_classifier.p', 'rb') as f:
+    with open(pose_classifier_path, 'rb') as f:
         model_data = pickle.load(f)
     return model_data['model']
 
