@@ -1,6 +1,6 @@
 # PROOF OF CONCEPT
 
-I am using python3.11. Package requirements for this project: mediapipe, scikit-learn
+I am using python3.11. Package requirements for this project: mediapipe, scikit-learn. You can run this by downlaoding step2_yoga_pose_detection_correction_video.py, 
 
 # step1:
 
@@ -29,3 +29,4 @@ c) Employ better hardware for getting realtime output without any lag.
 d) Optimize the code for faster response. If needed, use compiled language C++, java, etc.
 
 e) To enhance user experience, provide feedback in the form of audio and video, with a little music playing in the background depending on the pose.
+
