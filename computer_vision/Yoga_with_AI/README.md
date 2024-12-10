@@ -29,6 +29,3 @@ c) Employ better hardware for getting realtime output without any lag.
 d) Optimize the code for faster response. If needed, use compiled language C++, java, etc.
 
 e) To enhance user experience, provide feedback in the form of audio and video, with a little music playing in the background depending on the pose.
-
-
-

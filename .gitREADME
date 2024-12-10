@@ -1,6 +1,6 @@
 steps
-1) On GitHub create new repo 'django_work'
-2) On local machine, in the directory 'django_work', type
+1) On GitHub create new repo 'ai_projects'
+2) On local machine, in the directory 'ai_projects', type
   - git init
   - git remote add origin https://github.com/ash322ash422/ai_projects.git
   - git add .

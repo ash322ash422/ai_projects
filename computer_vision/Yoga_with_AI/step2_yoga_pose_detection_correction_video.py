@@ -218,7 +218,6 @@ def detectPoseOnVideo(video=None):
 
 # Initialize the VideoCapture object to read from a video stored in the disk.
 video = cv2.VideoCapture(video_path)
-# class_names = ['downdog', 'goddess', 'plank']
 detectPoseOnVideo(video=video)
         
     
