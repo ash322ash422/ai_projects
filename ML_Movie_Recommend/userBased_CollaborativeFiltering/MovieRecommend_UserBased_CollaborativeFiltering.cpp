@@ -7,7 +7,8 @@
 #include <algorithm>
 #include <map>
 #include <iomanip>
-#include <Eigen/Dense>
+
+#include <Eigen/Dense> // External library:  https://eigen.tuxfamily.org/index.php?title=Main_Page
 
 using namespace std;
 using namespace Eigen;

@@ -1,4 +1,4 @@
-# Movie Recommendation System using User-Based Collaborative Filtering
+# Vyorius Test: Movie Recommendation System using User-Based Collaborative Filtering
 This project implements a user-based collaborative filtering recommendation system in both Python and C++. The system suggests movies to users based on how others with similar interests have rated those movies.
 
 ## step 1:
@@ -15,8 +15,8 @@ I converted the above python code into C++ code. I debugged and checked the outp
 
 * I used the GNU g++ 13.2.0 compiler as distributed by the MSYS2 project on a Windows OS.
 * I downloaded eigen-3.4.0.zip file from https://eigen.tuxfamily.org/index.php?title=Main_Page . This was needed to compile the code that used "#include <Eigen/Dense>" directive. I extracted the zip file and put the directory eigen-3.4.0 inside the projects directory.
-* To compile: g++ -I C:\path\to\directory\eigen-3.4.0 MovieRecommend_UserBased_CollaborativeFiltering.cpp -o MovieRecommend
-* To execute: ./MovieRecommender.exe
+* To compile: g++ -I path\to\directory\eigen-3.4.0 MovieRecommend_UserBased_CollaborativeFiltering.cpp -o MovieRecommend
+* To execute: ./MovieRecommend.exe
 
 * A sample run:
 ```
