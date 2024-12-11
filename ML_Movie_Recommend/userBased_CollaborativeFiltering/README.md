@@ -3,7 +3,7 @@ This project implements a user-based collaborative filtering recommendation syst
 
 ## step 1:
 
-The initial design and testing were done using Python 3.11 due to its rapid development capabilities. Following libraries were used: jupyter==1.1.1, scikit-learn==1.6.0, pandas==2.2.3. As per the task requirements, I used "user-based collaborative-filtering". I tested on file ratingsTest.csv that contains 9 users and 7 movies. I was satisfied with the results. A sample run is appended at the end of the file MovieRecommend_UserBased_CollaborativeFiltering.cpp
+The initial design and testing were done using Python 3.11 due to its rapid development capabilities. Following libraries were used: jupyter==1.1.1, scikit-learn==1.6.0, pandas==2.2.3. As per the task requirements, I used "user-based collaborative-filtering". I tested on file ratingsTest.csv that contains 9 users and 7 movies. I was satisfied with the results. A sample run is appended at the end of the file MovieRecommend_UserBased_CollaborativeFiltering.ipynb
 
 NOTE: I did not use any Machine Learning or AI tools, although it can be used. Specifically, K-Nearest Neighbors (KNN) would be better option. I kept it simple to show proof of concept.
 
