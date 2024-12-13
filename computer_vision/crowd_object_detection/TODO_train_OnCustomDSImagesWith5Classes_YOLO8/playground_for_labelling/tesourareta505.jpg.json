@@ -1,0 +1,78 @@
+{
+    "description": "",
+    "tags": [],
+    "size": {
+        "height": 480,
+        "width": 640
+    },
+    "objects": [
+        {
+            "id": 29509604,
+            "classId": 50332,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "gr@datasetninja.com",
+            "createdAt": "2023-09-07T15:30:30.166Z",
+            "updatedAt": "2023-09-07T15:30:30.166Z",
+            "tags": [
+                {
+                    "id": 4164953,
+                    "tagId": 16389,
+                    "name": "occlusion",
+                    "value": "False",
+                    "labelerLogin": "gr@datasetninja.com",
+                    "createdAt": "2023-09-07T15:30:30.166Z",
+                    "updatedAt": "2023-09-07T15:30:30.166Z"
+                }
+            ],
+            "classTitle": "curved mayo scissor",
+            "points": {
+                "exterior": [
+                    [
+                        256,
+                        60
+                    ],
+                    [
+                        512,
+                        202
+                    ]
+                ],
+                "interior": []
+            }
+        },
+        {
+            "id": 29509603,
+            "classId": 50331,
+            "description": "",
+            "geometryType": "rectangle",
+            "labelerLogin": "gr@datasetninja.com",
+            "createdAt": "2023-09-07T15:30:30.165Z",
+            "updatedAt": "2023-09-07T15:30:30.165Z",
+            "tags": [
+                {
+                    "id": 4164952,
+                    "tagId": 16389,
+                    "name": "occlusion",
+                    "value": "True",
+                    "labelerLogin": "gr@datasetninja.com",
+                    "createdAt": "2023-09-07T15:30:30.165Z",
+                    "updatedAt": "2023-09-07T15:30:30.165Z"
+                }
+            ],
+            "classTitle": "straight mayo scissor",
+            "points": {
+                "exterior": [
+                    [
+                        270,
+                        152
+                    ],
+                    [
+                        422,
+                        383
+                    ]
+                ],
+                "interior": []
+            }
+        }
+    ]
+}
