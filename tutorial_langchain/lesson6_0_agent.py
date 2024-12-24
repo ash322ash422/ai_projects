@@ -12,8 +12,7 @@ from langchain.tools.retriever import create_retriever_tool
 # - Agents are able to interact with their env while using tools
 # - Goto Tavily AI website and get TAVILY_API_KEY
 
-# Here we create 2 tools for agent: 1st tool will allow agent to search the internet for
-# answer, 2nd tool will grant the agent access to our custom knowledge base
+# Here we create 1 tools for agent: allow agent to search the internet for answer
 
 model = ChatOpenAI(
     model='gpt-3.5-turbo-1106',
