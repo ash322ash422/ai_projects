@@ -3,8 +3,6 @@ load_dotenv() #loads .env file and sets up the environment variables like OPENAI
 
 from langchain_openai import ChatOpenAI
 
-# These lessons taken from https://www.youtube.com/watch?v=ekpnVh-l3YA
-
 llm = ChatOpenAI(
     # api_key = "your_openai_key", #not needed because of load_dotenv() method
     model="gpt-3.5-turbo",
