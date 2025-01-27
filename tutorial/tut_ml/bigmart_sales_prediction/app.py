@@ -2,12 +2,17 @@ import streamlit as st
 import joblib
 import numpy as np
 from pathlib import Path
+import os
 
 # Load the trained model
+on_streamlit_share = os.getenv("STREAMLIT_SERVER_RUN_ON_SAVE")
 cwd = Path.cwd()
-print(f"cwd:{cwd}")
-# model_path = cwd / 'model.pkl'
-model_path = cwd / 'tutorial' / 'tut_ml' / 'bigmart_sales_prediction' / 'model.pkl'
+
+if on_streamlit_share == None:
+    model_path = cwd / 'model.pkl'
+else:
+    model_path = cwd / 'tutorial' / 'tut_ml' / 'bigmart_sales_prediction' / 'model.pkl'
+
 trained_model = joblib.load(model_path)
 
 # Title for the app
