@@ -5,19 +5,20 @@ from pathlib import Path
 import os
 
 # Load the trained model
-on_streamlit_share = os.getenv("STREAMLIT_SERVER_RUN_ON_SAVE")
-cwd = Path.cwd()
-
-if on_streamlit_share == None:
-    model_path = cwd / 'model.pkl'
-else:
-    model_path = cwd / 'tutorial' / 'tut_ml' / 'bigmart_sales_prediction' / 'model.pkl'
-
-trained_model = joblib.load(model_path)
+def load_model():
+    model = 'model.pkl'
+    on_streamlit_share = os.getenv("STREAMLIT_SERVER_RUN_ON_SAVE")
+    if on_streamlit_share == None: # running on local machine
+        model_path = Path.cwd() / model
+    else: # running on streamlit share cloud
+        model_path = Path.cwd() / 'tutorial' / 'tut_ml' / 'bigmart_sales_prediction' / model
+            
+    return joblib.load(model_path) 
+    
+trained_model = load_model()
 
 # Title for the app
 st.title('Sales Prediction')
-
 
 # Get numerical input features from the user
 numerical_features = ['Item_Weight', 'Item_MRP']
