@@ -31,7 +31,6 @@ db.sqlite3
 *.jpeg
 *.mp3
 *.gif
-
 #*.mp4
-
 statisticalMethodBased_ZScore_3D-checkpoint.ipynb
+.ipynb_checkpoints/
