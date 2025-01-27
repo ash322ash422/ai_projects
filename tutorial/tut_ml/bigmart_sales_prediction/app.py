@@ -1,9 +1,13 @@
 import streamlit as st
 import joblib
 import numpy as np
+from pathlib import Path
 
 # Load the trained model
-trained_model = joblib.load('model.pkl')
+cwd = Path.cwd()
+print(f"cwd:{cwd}")
+model_path = cwd / 'model.pkl'
+trained_model = joblib.load(model_path)
 
 # Title for the app
 st.title('Sales Prediction')
