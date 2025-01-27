@@ -6,7 +6,8 @@ from pathlib import Path
 # Load the trained model
 cwd = Path.cwd()
 print(f"cwd:{cwd}")
-model_path = cwd / 'model.pkl'
+# model_path = cwd / 'model.pkl'
+model_path = cwd / 'tutorial' / 'tut_ml' / 'bigmart_sales_prediction' / 'model.pkl'
 trained_model = joblib.load(model_path)
 
 # Title for the app
