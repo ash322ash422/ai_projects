@@ -1,0 +1,1 @@
+EXTRACTED_SEG_REGIONS="extracted_seg_regions"

@@ -1,0 +1,292 @@
+{
+    "master_image": "C:\\Users\\hi\\Desktop\\projects\\python_projects\\ai_projects\\computer_vision\\Wesserstoff_tensorflow_keras\\data\\input_images\\input_image.jpg",
+    "objects": [
+        {
+            "unique_id": "object_1",
+            "image_name": "object_07fb4016-b112-4229-93f5-469e7afb08fb.png",
+            "object_description": "car (0.65); car (0.50); bicycle (0.29)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_2",
+            "image_name": "object_11592a5b-1eb0-464c-98d9-c2a1eee02dd7.png",
+            "object_description": "bicycle (0.31)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_3",
+            "image_name": "object_20e02a07-043c-4576-984d-53fb1f454c48.png",
+            "object_description": "person (0.70); dog (0.55); car (0.31); car (0.28)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_4",
+            "image_name": "object_2111f681-2e28-4d2c-95e8-a26ada0148b1.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_5",
+            "image_name": "object_2909dda2-12ab-4b19-8c60-550bbd49246e.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_6",
+            "image_name": "object_295b38b7-321e-4ac9-af9b-767aa189fa20.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_7",
+            "image_name": "object_2f00f3e2-569b-4077-afc1-0ca047279c55.png",
+            "object_description": "person (0.42)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_8",
+            "image_name": "object_3c432f98-6e2d-4cf9-a2e8-76b03b161e4f.png",
+            "object_description": "tv (0.28)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_9",
+            "image_name": "object_47b92c57-ccc4-4397-8c51-94968312d0c2.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_10",
+            "image_name": "object_549735fd-1562-47cb-9b24-00ece1f76dea.png",
+            "object_description": "car (0.33)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_11",
+            "image_name": "object_5a32f197-2c95-422c-b522-938fd35af212.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_12",
+            "image_name": "object_5fdda536-1dc2-4ad0-9f30-05035f62b0b6.png",
+            "object_description": "car (0.26)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_13",
+            "image_name": "object_6224e48e-b46f-4a24-8a4a-92d4c7e2f721.png",
+            "object_description": "train (0.36)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_14",
+            "image_name": "object_6a7bd031-1f74-4d7d-a77e-df312cbbbad3.png",
+            "object_description": "bicycle (0.57); car (0.32); truck (0.31); person (0.30); car (0.25)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_15",
+            "image_name": "object_718a307a-3d5e-4091-97d3-8240039d0c2f.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_16",
+            "image_name": "object_7e5d5869-09ee-4d00-95b0-bc3555055723.png",
+            "object_description": "Error processing image: Given groups=1, weight of size [32, 3, 6, 6], expected input[1, 2, 224, 640] to have 3 channels, but got 2 channels instead",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_17",
+            "image_name": "object_81bdb96d-3e97-4a64-b8ec-3a130a3978fd.png",
+            "object_description": "person (0.52)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_18",
+            "image_name": "object_838014d5-3ddc-4232-91d1-b3b6680ca811.png",
+            "object_description": "Unknown",
+            "extracted_text": "STOP",
+            "summary": "CNN.com will feature iReporter photos in a weekly Travel Snapshots gallery. Please submit your best shots of New York for next week. Visit CNN.com/Travel next Wednesday for a new gallery of snapshots."
+        },
+        {
+            "unique_id": "object_19",
+            "image_name": "object_8d74f1ed-b9c2-4689-ac23-6a6fc3bcbfc8.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_20",
+            "image_name": "object_8ff4858b-7d5c-4cf1-b0d5-c11fdd70263e.png",
+            "object_description": "person (0.56)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_21",
+            "image_name": "object_973faedb-ce31-44e6-b232-1edf465d7db0.png",
+            "object_description": "bicycle (0.26)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_22",
+            "image_name": "object_98a17890-24fa-4389-af22-3de8e0ddc1b2.png",
+            "object_description": "car (0.30)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_23",
+            "image_name": "object_a3e36ce0-9593-4449-9fc5-95570363c713.png",
+            "object_description": "person (0.37); car (0.29)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_24",
+            "image_name": "object_aa94e92c-cd20-404c-881e-d0919a5e106e.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_25",
+            "image_name": "object_b34d4c22-2b6d-45c9-b520-50882514293a.png",
+            "object_description": "person (0.84); car (0.36)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_26",
+            "image_name": "object_b66b6799-7b1d-48ca-9d67-7d8b8532be55.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_27",
+            "image_name": "object_b7558d6b-0999-4d29-a2d9-eca887a6a46c.png",
+            "object_description": "bicycle (0.35); motorcycle (0.35)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_28",
+            "image_name": "object_bb5c6ce0-fd50-4c08-acd9-35d0f1c5616c.png",
+            "object_description": "car (0.58); stop sign (0.49); car (0.48)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_29",
+            "image_name": "object_bf6924cb-66a7-4b56-80ce-c06d52535fae.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_30",
+            "image_name": "object_bf87aee6-f710-4d00-8cd1-850269e25a32.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_31",
+            "image_name": "object_c31b10f5-21d9-4462-afc2-c535aa7b750a.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_32",
+            "image_name": "object_cab71f34-c830-4e49-a308-98ce6495bd29.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_33",
+            "image_name": "object_cb2c1f57-4561-4fe5-8038-c5e9dc5456b5.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_34",
+            "image_name": "object_d4aafd2a-d093-4f2f-9b50-90f1f5a76ce6.png",
+            "object_description": "Error processing image: Given groups=1, weight of size [32, 3, 6, 6], expected input[1, 2, 448, 640] to have 3 channels, but got 2 channels instead",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_35",
+            "image_name": "object_d8e0e9ca-bfa1-4b61-b050-904660b2e37b.png",
+            "object_description": "bicycle (0.58)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_36",
+            "image_name": "object_d93e627f-712c-405c-aea8-6d26b594cf3d.png",
+            "object_description": "person (0.78); bicycle (0.73)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_37",
+            "image_name": "object_e3d59e91-1968-4c71-b260-900381ab9261.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_38",
+            "image_name": "object_ea65c923-c536-4781-aa0a-681248b69829.png",
+            "object_description": "person (0.31)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_39",
+            "image_name": "object_ec4d57c7-9d5d-4e4b-9b31-ace337978f3d.png",
+            "object_description": "handbag (0.55); car (0.51); person (0.39); bicycle (0.34); car (0.33); handbag (0.30); person (0.27)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_40",
+            "image_name": "object_f0cca65d-7eb9-47b1-aa5c-09f63ac90977.png",
+            "object_description": "train (0.36)",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        },
+        {
+            "unique_id": "object_41",
+            "image_name": "object_f7c3dd10-bc8f-4cf0-b30f-3f03b72803ea.png",
+            "object_description": "Unknown",
+            "extracted_text": "No text detected",
+            "summary": "Summary not applicable"
+        }
+    ]
+}

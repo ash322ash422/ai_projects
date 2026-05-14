@@ -1,0 +1,5 @@
+Bacterial_Spot_pepperbell
+Bacterial_wilt_moneyplant
+Early_blight_potato
+invalid_input
+Late_blight_potato

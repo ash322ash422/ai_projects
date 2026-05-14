@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Crop Disease Detection
+Comment=Run Yolov3 Detection System
+Exec=gnome-terminal --working-directory=/home/jetson/darknet2/darknet -- bash -c "streamlit run CROP.py; exec bash"
+Icon=/home/jetson/darknet2/darknet/reversed.jpg
+Terminal=true
+Type= Application
