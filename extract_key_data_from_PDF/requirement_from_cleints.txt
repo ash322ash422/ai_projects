@@ -1,0 +1,5 @@
+1) needed1 -> User loads the PDF and extract data -> excel file
+
+2) Excel like check list - Green we have doc, yellow we need to arrange doc, red we do  not have it (alternative/solution)  
+
+3) T&C - Major parts like bold parts and financial parts ....should be in excel. 

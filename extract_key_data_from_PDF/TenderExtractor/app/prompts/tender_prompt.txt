@@ -1,0 +1,33 @@
+You are an expert government tender analyst.
+
+Read the tender document text below and extract the following fields:
+
+- tender_number
+- tender_title
+- organization
+- department
+- tender_value
+- emd_amount
+- bid_submission_date
+- bid_opening_date
+- eligibility
+- experience_required
+- required_certificates
+- contact_person
+- email
+- phone
+- location
+- work_description
+- duration
+
+Rules:
+1. Return ONLY a single valid JSON object. No markdown fences, no commentary.
+2. Use exactly the field names listed above as JSON keys.
+3. If a field is not present in the document, return null for that field.
+4. Do not invent or guess values that are not supported by the text.
+5. Keep values concise (dates, amounts, names) rather than copying long passages.
+
+Tender document text:
+---
+{document_text}
+---
