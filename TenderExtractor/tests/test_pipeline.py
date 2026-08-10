@@ -1,45 +1,58 @@
 """
-Lightweight tests for the parts of the pipeline that don't require live
-Azure credentials: JSON extraction, validation, and Excel generation.
+Unit tests for the parts of the pipeline that don't require live Azure
+credentials: prompt building, LLM-result merging, and field validation.
 
 Run with:
     pytest tests/
 """
-
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from app.models.tender_model import TenderData
-from app.services.excel_service import excel_service
-from app.services.validation_service import validation_service
-from app.utils.helper import extract_json_block, new_job_id, safe_filename
+from TenderExtractor_v2.app.services.nit_data_service import merge_results
+from app.services.prompt import FIELDS_TO_EXTRACT, build_extraction_prompt
+from app.services.validation import validate_amount, validate_date, validate_extracted_json
 
 
-def test_new_job_id_is_unique():
-    assert new_job_id() != new_job_id()
+def test_merge_results_first_non_empty_wins():
+    partials = [
+        {"nit_number": "", "earnest_money": "Rs. 50,000"},
+        {"nit_number": "NIT/2026/12", "earnest_money": "Rs. 999"},
+    ]
+    merged = merge_results(partials)
+    assert merged["nit_number"] == "NIT/2026/12"
+    assert merged["earnest_money"] == "Rs. 50,000"
 
 
-def test_safe_filename_strips_bad_chars():
-    # Path(...).name already discards any directory components,
-    # then remaining unsafe characters (space, ?) are replaced.
-    assert safe_filename("../../evil name?.pdf") == "evil_name_.pdf"
+def test_validate_amount_normalizes_currency_formatting():
+    result = validate_amount("Rs. 5,29,995/-")
+    assert result["valid"] is True
+    assert result["normalized"] == 529995.0
+    assert result["original"] == "Rs. 5,29,995/-"
 
 
-def test_extract_json_block_handles_markdown_fence():
-    raw = '```json\n{"tender_number": "GEM/2026/1"}\n```'
-    parsed = extract_json_block(raw)
-    assert parsed["tender_number"] == "GEM/2026/1"
+def test_validate_amount_handles_missing_value():
+    result = validate_amount("")
+    assert result["valid"] is False
+    assert result["normalized"] is None
 
 
-def test_validation_fills_missing_fields_with_none():
-    tender = validation_service.validate({"tender_number": "GEM/2026/1"})
-    assert tender.tender_number == "GEM/2026/1"
-    assert tender.email is None
+def test_validate_date_parses_ddmmyyyy_inside_free_text():
+    result = validate_date("17:00 hrs. on 17.07.2026")
+    assert result["valid"] is True
+    assert result["normalized"] == "2026-07-17"
 
 
-def test_excel_service_builds_a_workbook():
-    tender = TenderData(tender_number="GEM/2026/1", organization="Ministry of Railways")
-    output = excel_service.build(tender, source_filename="sample.pdf")
-    assert output[:2] == b"PK"  # xlsx files are zip archives
+def test_validate_date_rejects_unparseable_text():
+    result = validate_date("sometime next month")
+    assert result["valid"] is False
+    assert result["normalized"] is None
+
+
+def test_validate_extracted_json_preserves_originals_for_non_typed_fields():
+    validated = validate_extracted_json({"nit_number": "NIT/2026/12"})
+    assert validated["nit_number"]["original"] == "NIT/2026/12"
+    assert "normalized" not in validated["nit_number"]
+
+
+def test_build_extraction_prompt_includes_all_field_names():
+    pages = [{"page_number": 1, "text": "sample", "tables": [], "key_value_pairs": []}]
+    prompt = build_extraction_prompt(pages, FIELDS_TO_EXTRACT)
+    for field in FIELDS_TO_EXTRACT:
+        assert field["name"] in prompt
