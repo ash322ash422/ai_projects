@@ -14,6 +14,14 @@ public-key.zip
 *.pem
 keys*
 
+
+# Ignore all .yaml files
+*.yaml
+
+# Do not ignore any files that end with .yaml.example
+!*.yaml.example
+
+
 README.secret
 README.furtive
 config.py

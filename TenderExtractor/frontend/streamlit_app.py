@@ -73,7 +73,18 @@ def _authed_request(method: str, path: str, **kwargs) -> requests.Response:
 
 def _show_login_form() -> None:
     st.title("Tender Extractor")
+    st.markdown(
+    '<p style="color: darkgreen; font-size: 20px; font-weight: 600;">Company: Comfort Solutions Group</p>',
+    unsafe_allow_html=True
+    )
     st.subheader("Log in")
+    st.markdown(
+        '<div style="position: fixed; bottom: 10px; right: 20px; '
+        'color: #999; font-size: 8px; font-weight: 300;">'
+        'Developed by ash322.ash422@gmail.com'
+        '</div>',
+        unsafe_allow_html=True
+    )    
 
     with st.form("login_form"):
         username = st.text_input("Username")
@@ -135,8 +146,22 @@ def _run_extraction(uploaded_file) -> None:
 
 def _show_app() -> None:
     header_col, logout_col = st.columns([5, 1])
+    
     with header_col:
         st.title("Tender Extractor")
+        st.markdown(
+        '<p style="color: darkgreen; font-size: 20px; font-weight: 600;">Company: Comfort Solutions Group</p>',
+        unsafe_allow_html=True
+        )
+        st.markdown(
+            '<div style="position: fixed; bottom: 10px; right: 20px; '
+            'color: #999; font-size: 8px; font-weight: 300;">'
+            'Developed by ash322.ash422@gmail.com'
+            '</div>',
+            unsafe_allow_html=True
+        )    
+
+    
     with logout_col:
         if st.button("Log out"):
             st.session_state.pop("access_token", None)

@@ -33,6 +33,9 @@ STAGES = [
     ("extract_misc", stages.stage_extract_tender_misc_data), # Makes LLM call
     ("export_misc", stages.stage_export_tender_misc_data),
 
+    ("extract_soq", stages.stage_extract_schedule_of_quantity), # Makes LLM call - last config.SOQ_LAST_PAGES pages only
+    ("export_soq", stages.stage_export_schedule_of_quantity),
+
     ("consolidate_all_excels", stages.stage_consolidate_all_excels),
     ("add_page_usage_report", stages.stage_add_page_usage_report),
 

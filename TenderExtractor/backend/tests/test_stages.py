@@ -162,7 +162,7 @@ def test_stage_check_index_and_tender_extracts_index_when_tender_confirmed(monke
     }
 
     monkeypatch.setattr(
-        stages.index_data_service, "extract_data",
+        stages.tender_index_extract_service, "extract_data",
         lambda pages, token_callback=None: {
             "terms_and_conditions_page": "44-48",
             "acceptable_make_page": None,

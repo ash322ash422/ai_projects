@@ -24,9 +24,13 @@ It pulls out these kinds of information from each confirmed tender:
   parsed into a consistent format), producing both a clean spreadsheet
   and an audit version (original value + normalized value + valid flag
   side by side, for QA).
-- **Misc data** — terms & conditions, permissible makes, required
+- **Misc data** — terms & conditions, permissible makes, and required
   documents — extracted from the full document in page-chunked batches,
-  with matching sections merged back together across chunk boundaries.
+  with matching sections (and split tables) merged back together across
+  chunk boundaries.
+- **Schedule of Quantity** (a.k.a. Schedule of Work / Bill of Quantities)
+  — extracted separately from just the last few pages of the document,
+  where it reliably lives, via its own dedicated LLM call.
 - **An index/table of contents** of the document, extracted from the same
   preview pages used for the tender check, to help guide the rest of the
   pipeline.
@@ -57,11 +61,15 @@ What actually happens when a user uploads a PDF, end to end:
    tender check** (keyword match on those same preview pages — a document
    that doesn't look like a tender stops right here with status
    `NOT_A_TENDER`, no further stages run) → **full OCR** (Document
-   Intelligence, confirmed tenders only) → **LLM extraction** (NIT / misc
-   fields) → **validate & normalize** → **Excel export** →
-   **consolidate** → **page usage report** → **publish** (local disk or
-   Blob Storage) → **notify** (email) — updating the job's status (and
-   live token/page counts) in SQLite after each stage.
+   Intelligence, confirmed tenders only) → **NIT extraction** → **validate
+   & normalize** → **NIT Excel export** → **misc extraction** (Terms &
+   Conditions / Acceptable Make / Documents to Upload) → **misc Excel
+   export** → **Schedule of Quantity extraction** (last few pages only) →
+   **Schedule of Quantity Excel export** → **consolidate** → **page usage
+   report** → **publish** (local disk or Blob Storage) → **notify**
+   (email) — updating the job's status (and live token/page counts) in
+   SQLite after each stage. See [Extraction logic](#extraction-logic-how-each-field-gets-found)
+   below for how each of these LLM calls actually decides what to extract.
 5. The frontend polls `GET /tenders/{job_id}` every 2 seconds, showing the
    current stage, until the job reaches `COMPLETED` (a download button
    appears), `NOT_A_TENDER` (a warning is shown, no download), or `FAILED`
@@ -73,6 +81,121 @@ What actually happens when a user uploads a PDF, end to end:
    push itself fails (see [Job status DB backup](#job-status-db-backup-to-blob-storage) below).
 7. Once the pipeline finishes, a second background task opportunistically
    triggers old-job cleanup if enough time has passed since the last sweep.
+
+## Extraction logic: how each field gets found
+
+Four separate concerns, each with its own page-scoping strategy and its
+own LLM call — not one call trying to find everything at once. This
+grew out of real bugs: an early version had Terms & Conditions,
+Acceptable Make, Documents to Upload, *and* Schedule of Quantity all
+sharing one prompt, and the LLM kept misclassifying content between them
+whenever it had to scan large, heterogeneous stretches of the document at
+once. What follows is current as of this section being written — if
+you're adding a new extracted field, skim this first so you don't
+reintroduce a bug that was already fixed once.
+
+### Index (`app/services/tender_index_extract_service.py`)
+Sent just the first `INDEX_CHECK_PAGES` pages (default 3) — the same OCR
+pass used for the tender keyword check (`stage_ocr_preview`). Looks for
+page references to Terms & Conditions / Acceptable Make / Documents to
+Upload in the document's own index/table of contents, if it has one.
+Written to `logs/{job_id}/index.json` for visibility; nothing downstream
+currently depends on these page numbers. A more ambitious redesign was
+considered - use the index to narrow the *misc* extraction below to just
+the relevant page ranges per field, the way Schedule of Quantity is
+narrowed by fixed position - but was set aside in favor of the simpler
+fixed-position narrowing (works well since Schedule of Quantity's
+position is predictable) plus the deterministic filters below (which
+directly targeted the bugs actually observed), rather than taking on the
+extra complexity of inferring per-field page ranges from an index that
+isn't always complete or present.
+
+### NIT fields (`app/services/tender_nit_extract_service.py`)
+Sent the first several pages of the *full* OCR pass — NIT fields (dates,
+amounts, EMD, officer names, etc.) reliably live near the front of a CPWD
+tender. Extracted, then validated/normalized (`app/services/validation.py`
+parses dates and currency amounts into a consistent format), then exported
+to *two* spreadsheets (`tender_nit_export_excel.py`): an audit version
+(original value + normalized value + valid flag, for QA) and a clean
+version (just the normalized values, what ships to the reader).
+
+### Terms & Conditions / Acceptable Make / Documents to Upload (`app/services/tender_misc_extraction_service.py`)
+Sent the *whole* document, in page-chunked batches of `MISC_PAGES_PER_CHUNK`
+pages (default 30) — unlike NIT fields or Schedule of Quantity, these three
+can legitimately appear almost anywhere, so there's no reliable page range
+to narrow to. This is the field group that took the most iteration to get
+right, across several real documents. The prompt and the deterministic
+post-processing filters below both exist because of *specific* observed
+misclassification bugs, not speculative hardening — each one is a fix for
+something that actually happened once:
+
+- **Ragged rows get a loud warning, not a silent fix.** The LLM
+  occasionally drops or duplicates a cell while re-typing a table (usually
+  a row with an OCR selection-mark artifact, or heavily wrapped text),
+  which silently shifts every later cell in that row into the wrong Excel
+  column. There's no reliable way to guess which cell went missing, so
+  `ExtractedTable`'s Pydantic validator logs a warning identifying the
+  table/row instead of guessing — check `logs/{job_id}/ocr.json`'s raw
+  Document Intelligence table for the real values if you see one.
+- **A Terms & Conditions section can lose its own table.** The LLM
+  sometimes classifies a T&C section correctly but simply omits a small
+  table that's actually on that page — non-deterministic across identical
+  calls, not a prompt-wording problem. If a T&C section ends up with no
+  table of its own, `_attach_missing_terms_tables_from_raw_ocr` attaches
+  Document Intelligence's own already-parsed table for that page directly
+  — copied verbatim, never re-typed by the LLM, so it can't be wrong.
+- **Signature blocks, scope-of-work tables, and equipment inventories get
+  excluded from Terms & Conditions**, even when the LLM finds them nested
+  under a T&C-shaped heading (e.g. "Maintenance of Fire-Fighting System"
+  mixing genuine procedural clauses with an embedded equipment inventory
+  and a "Work Involved" scope table). `_drop_non_terms_tables_from_terms_and_conditions`
+  recognizes these by column-header shape — all-designation columns
+  ("Assistant Engineer" / "Executive Engineer"), "Work Involved"/"Scope of
+  Work" columns, or an "Item"+"Total" combination — and drops just the
+  offending tables, keeping the genuine clauses.
+- **Annexures/proforma templates never get summarized into a fabricated
+  list.** A blank "Willingness Certificate" that merely *names* a brand
+  (as an OEM-authorization fill-in-the-blank) isn't Acceptable Make, even
+  though a brand name is technically present on the page — the LLM was
+  once caught inventing a 3-item "Acceptable Make" list by summarizing
+  what three such certificate pages were about, rather than quoting them.
+
+### Schedule of Quantity (`app/services/tender_soq_extract_service.py`)
+Deliberately **separate** from the three fields above, sent only the
+**last** `SOQ_LAST_PAGES` pages (default 5) in one dedicated, narrowly
+scoped LLM call. This used to be a fourth field sharing the big
+multi-purpose call above — which is exactly what caused it to repeatedly
+pick up other pages' tables (a proforma index page's heading glued onto an
+unrelated rate table found elsewhere; a Terms & Conditions page's small
+example-rates table; the same rows described twice, once as plain items
+and once as a table). Narrowing the input to just the pages where it
+actually lives fixed that whole class of bug by construction, instead of
+needing yet another exclusion rule layered onto an already-long prompt.
+Its schema also has no `items` field at all — Schedule of Quantity is
+inherently tabular, so there's no way for the same row to get described
+twice in two different shapes. Still backed by one deterministic filter:
+`_drop_non_quantity_tables` drops any table without an explicit
+Quantity/Qty column, since that's the one thing that actually makes a
+schedule of *quantity* a schedule of quantity (rather than, say, an
+unrelated rate table that happened to be in the last few pages).
+
+### Iterating on extraction logic without re-paying for OCR
+`logs/{job_id}/ocr.json` and `ocr_preview.json` are the full,
+already-paid-for Document Intelligence output for any job that's gone
+through the real pipeline at least once. To test a prompt or filter change
+against real tender data without a new OCR call (or without re-running
+extraction stages you're not touching):
+
+```bash
+cd backend
+python -m scripts.rerun_from_cached_ocr JOB_ID --misc   # or --nit, --index, --soq, --all
+```
+
+Overwrites that job's own `logs/{job_id}/*.json` audit files and
+`output/{job_id}/` deliverables in place — the same paths `run_pipeline()`
+itself would have written. This is how every extraction bug fix described
+above was actually verified against real tender data before being
+considered done; see the script's own docstring for the full option list.
 
 ## Architecture at a glance
 
@@ -186,6 +309,7 @@ required has a working default.
 | `MISC_PAGES_PER_CHUNK` | `30` | Batch size (pages) for the misc-data extraction pass. |
 | `MAX_UPLOAD_SIZE_MB` | `10` | `POST /tenders` rejects anything larger with a `413`. |
 | `INDEX_CHECK_PAGES` | `3` | How many leading pages get OCR'd for the tender pre-check (keyword match) and fed to the index-extraction LLM call. |
+| `SOQ_LAST_PAGES` | `5` | How many trailing pages get sent to the Schedule of Quantity LLM call — it reliably lives near the end of the document, so this is deliberately narrow rather than scanning everything. |
 | `MAX_PAGES_PER_MONTH` | `10000` | Shared monthly OCR page budget across all jobs, bucketed by calendar month in IST. `POST /tenders` returns `429` once this month's usage is already at/over the limit; reported in every tender's "Page Usage Report" Excel sheet. |
 | `UPLOAD_RETENTION_DAYS` | `7` | Days before a job's `data_uploads/{job_id}/` is deleted by cleanup. |
 | `OUTPUT_LOGS_RETENTION_DAYS` | `30` | Days before a job's `output/{job_id}/` + `logs/{job_id}/` are deleted. |
@@ -350,6 +474,19 @@ see Known issues below.
   lock.** `POST /tenders` only checks usage *before* accepting an upload —
   two uploads landing at the threshold at nearly the same time can jointly
   push usage over the cap once both pipelines run.
+- **The misc extraction (Terms & Conditions / Acceptable Make / Documents
+  to Upload) is the least deterministic part of the pipeline.** The same
+  cached OCR input has produced different results across separate runs in
+  practice (a table present on one call, missing on the next). The
+  deterministic filters described in
+  [Extraction logic](#extraction-logic-how-each-field-gets-found) catch
+  every *specific* misclassification pattern seen so far, but that list
+  isn't exhaustive — a genuinely new failure shape could still slip
+  through. If you spot one, `logs/{job_id}/misc.json` plus
+  `logs/{job_id}/ocr.json` (Document Intelligence's own raw parse, usually
+  the ground truth) is the fastest way to diagnose it, and
+  `scripts/rerun_from_cached_ocr.py` lets you iterate on a fix without
+  paying for OCR again.
 - **The CLI (`backend/main.py`) has no auth and no CORS.** It's meant for
   trusted local/batch use, not for exposing over a network — only the
   FastAPI app (`app/api/main.py`) is meant to be reachable remotely.
@@ -389,14 +526,16 @@ backend/
       blob_storage.py
       document_intelligence.py
       llm.py
-      prompt.py
-      tender_detection.py      # keyword check used by the tender pre-check gate
-      index_data_service.py
-      nit_data_service.py
-      tender_extraction_service.py
-      validation.py
-      nit_export_excel.py
-      tender_export_excel.py
+      prompt.py                          # NIT field list (FIELDS_TO_EXTRACT)
+      tender_detection.py                 # keyword check used by the tender pre-check gate
+      tender_index_extract_service.py      # index/table-of-contents page references
+      tender_nit_extract_service.py        # NIT field extraction (dates, amounts, EMD, etc.)
+      tender_nit_export_excel.py           # NIT -> audit + clean spreadsheets
+      tender_misc_extraction_service.py    # Terms & Conditions / Acceptable Make / Documents to Upload
+      tender_misc_export_excel.py          # misc extraction -> one sheet per field
+      tender_soq_extract_service.py        # Schedule of Quantity - separate call, last few pages only
+      tender_soq_export_excel.py           # Schedule of Quantity -> its own sheet
+      validation.py                        # date/currency normalization for NIT fields
       page_usage_report.py     # builds the "Page Usage Report" Excel sheet
       consolidate_excels_files.py
       email_service.py
@@ -406,11 +545,13 @@ backend/
     utils/
       logging_config.py
   main.py                    # CLI: discovers PDFs and runs the pipeline over them
-  scripts/                   # dev-only utilities (env checks, token usage report, cleanup)
-    cleanup_old_jobs.py        # deletes past-retention job folders - triggered by the API itself, see ## Cleanup
+  scripts/                   # dev-only utilities
+    cleanup_old_jobs.py         # deletes past-retention job folders - triggered by the API itself, see ## Cleanup
+    print_token_usage.py        # summarizes token_count/ocr_page_count across every recorded job
+    rerun_from_cached_ocr.py    # re-run extraction from a job's saved OCR, no new Document Intelligence call - see ## Extraction logic
   tests/
   data_uploads/{job_id}/       # each run's own copy of its source PDF
-  output/{job_id}/              # each run's own Excel deliverables
+  output/{job_id}/              # each run's own Excel deliverables (.nit_audit.xlsx, .nit_clean.xlsx, .misc.xlsx, .soq.xlsx, and the final consolidated .xlsx)
   logs/                          # app.log, logs/.cleanup_last_run, and logs/{job_id}/ per-run audit copies
   local_state/                   # job_flow_status.db (SQLite) - local disk only, not network-mounted
   Dockerfile                  # backend image build - see ## Running with Docker
@@ -467,11 +608,34 @@ Intelligence, the LLM, email) and nothing about tenders or the pipeline.
 
 ## Adding a new field to extract
 
-1. Add `{"name": ..., "description": ...}` to `FIELDS_TO_EXTRACT` in
-   `backend/app/services/prompt.py`.
-2. If it's a date or currency amount, add its exact name to `DATE_FIELDS` /
-   `AMOUNT_FIELDS` in `backend/app/services/validation.py` so it gets
-   normalized automatically. Otherwise it's carried through as-is.
+Where a new field goes depends on which of the four extraction concerns
+in [Extraction logic](#extraction-logic-how-each-field-gets-found) it
+belongs to:
+
+- **A new NIT field** (a single scalar value near the front of the
+  document, like an existing date/amount/name field):
+  1. Add `{"name": ..., "description": ...}` to `FIELDS_TO_EXTRACT` in
+     `backend/app/services/prompt.py`.
+  2. If it's a date or currency amount, add its exact name to
+     `DATE_FIELDS` / `AMOUNT_FIELDS` in `backend/app/services/validation.py`
+     so it gets normalized automatically. Otherwise it's carried through
+     as-is.
+- **A new misc field** (Terms & Conditions-shaped: sections with
+  items/tables/notes, could appear almost anywhere in the document): add
+  it to `TenderExtraction` and `SYSTEM_PROMPT` in
+  `tender_misc_extraction_service.py`, and to `FIELD_TO_SHEET_TITLE` in
+  `tender_misc_export_excel.py`. Expect to iterate - this file's real
+  history is several rounds of "the LLM over/under-included content" bug
+  fixes, each backed by a deterministic filter, not just prompt wording.
+  Read the misc section of [Extraction logic](#extraction-logic-how-each-field-gets-found)
+  before starting.
+- **A field with a known, narrow page range** (like Schedule of Quantity -
+  reliably near the front or back, not spread across the whole document):
+  give it its own extract-service/export-service pair rather than folding
+  it into the misc call, following `tender_soq_extract_service.py` /
+  `tender_soq_export_excel.py` as the template. A focused prompt over a
+  handful of pages is both cheaper and far less error-prone than adding
+  yet another field to the already-large misc prompt.
 
 ## Tests
 
@@ -482,10 +646,13 @@ cd backend && pytest tests/
 Covers prompt building, chunk-merging, field validation, the SQLite job
 store (including the monthly usage queries), the tender pre-check gate
 (keyword matching and the `NOT_A_TENDER` short-circuit through
-`run_pipeline`), the page usage report, the job-DB Blob Storage backup, and
-the API's login/upload/status/download/quota contract (with `run_pipeline`
-mocked where relevant, so these never touch Azure) — everything that
-doesn't need live Azure credentials to test.
+`run_pipeline`), the page usage report, the job-DB Blob Storage backup,
+every deterministic misc/Schedule-of-Quantity filter described in
+[Extraction logic](#extraction-logic-how-each-field-gets-found) (regression
+tests for each real bug they fix), and the API's
+login/upload/status/download/quota contract (with `run_pipeline` mocked
+where relevant, so these never touch Azure) — everything that doesn't need
+live Azure credentials to test.
 
 **If your local `.env` has real Azure credentials** (needed to test Blob
 Storage / Document Intelligence / OpenAI features locally), be careful:

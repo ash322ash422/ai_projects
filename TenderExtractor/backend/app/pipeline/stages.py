@@ -16,19 +16,24 @@ from app.pipeline.exceptions import TenderCheckStopped
 from app.services import (
     blob_storage,
     document_intelligence,
-    index_data_service,
-    nit_data_service,
     page_usage_report,
     tender_detection,
     validation,
-    nit_export_excel,
-    tender_extraction_service,
-    tender_export_excel,
     consolidate_excels_files,
     email_service,
 )
+
 from app.services.prompt import FIELDS_TO_EXTRACT
 from app.utils.logging_config import get_logger
+from app.services import (
+                        tender_index_extract_service,
+                        tender_misc_export_excel,
+                        tender_misc_extraction_service,
+                        tender_nit_export_excel,
+                        tender_nit_extract_service,
+                        tender_soq_export_excel,
+                        tender_soq_extract_service,
+)
 
 logger = get_logger(__name__)
 
@@ -126,7 +131,7 @@ def stage_check_index_and_tender(ctx: PipelineContext) -> None:
         )
 
     try:
-        ctx.extracted_index_data = index_data_service.extract_data(
+        ctx.extracted_index_data = tender_index_extract_service.extract_data(
             pages, token_callback=lambda n: _accumulate_tokens(ctx, n)
         )
         _save_json(ctx.job_audit_path("index.json"), ctx.extracted_index_data)
@@ -134,7 +139,7 @@ def stage_check_index_and_tender(ctx: PipelineContext) -> None:
     except ValueError:
         logger.warning(
             "[%s] '%s' section not found, skipping.",
-            ctx.blob_name, index_data_service.TARGET_HEADING,
+            ctx.blob_name, tender_index_extract_service.TARGET_HEADING,
         )
 
 
@@ -167,7 +172,7 @@ def stage_ocr(ctx: PipelineContext) -> None:
 # sends it to LLM for extraction of NIT data
 # --------------------------------------------------------------------------
 def stage_extract_nit_data(ctx: PipelineContext) -> None:
-    ctx.extracted_nit_data = nit_data_service.extract_document(
+    ctx.extracted_nit_data = tender_nit_extract_service.extract_document(
         document_data=ctx.document_data,
         fields=FIELDS_TO_EXTRACT,
         token_callback=lambda n: _accumulate_tokens(ctx, n),
@@ -187,11 +192,11 @@ def stage_validate_nit(ctx: PipelineContext) -> None:
 # Stage 5: Export to Excel
 # --------------------------------------------------------------------------
 def stage_export_nit_data(ctx: PipelineContext) -> None:
-    audit_df = nit_export_excel.validation_json_to_dataframe(ctx.validated_nit_data)
-    nit_export_excel.save_dataframe_to_excel(audit_df, ctx.audit_nit_excel_path)
+    audit_df = tender_nit_export_excel.validation_json_to_dataframe(ctx.validated_nit_data)
+    tender_nit_export_excel.save_dataframe_to_excel(audit_df, ctx.audit_nit_excel_path)
 
-    clean_df = nit_export_excel.validation_json_to_clean_dataframe(ctx.validated_nit_data)
-    nit_export_excel.save_dataframe_to_excel(clean_df, ctx.clean_nit_excel_path)
+    clean_df = tender_nit_export_excel.validation_json_to_clean_dataframe(ctx.validated_nit_data)
+    tender_nit_export_excel.save_dataframe_to_excel(clean_df, ctx.clean_nit_excel_path)
 
 
 # --------------------------------------------------------------------------
@@ -201,7 +206,7 @@ def stage_extract_tender_misc_data(ctx: PipelineContext) -> None:
     pages = _get_pages(ctx)
 
     try:
-        ctx.extracted_misc_data = tender_extraction_service.extract_data(
+        ctx.extracted_misc_data = tender_misc_extraction_service.extract_data(
             pages,
             token_callback=lambda n: _accumulate_tokens(ctx, n),
             page_chunk_size=config.MISC_PAGES_PER_CHUNK,
@@ -221,20 +226,66 @@ def stage_export_tender_misc_data(ctx: PipelineContext) -> None:
 
     # 1. Defensive Guard Clause
     if not data:
-        logger.warning("[%s] No extracted misc. data found in context. Skipping export.", ctx.blob_name)
+        logger.warning("[%s] No extracted misc. data found in context. Skipping export.", 
+                       ctx.blob_name
+        )
         return
 
     # 2. Safe Generation and Save
     try:
-        filename = tender_export_excel.export_extraction_to_excel(data, ctx.exported_misc_excel_path)
+        filename = tender_misc_export_excel.export_extraction_to_excel(data, ctx.exported_misc_excel_path)
         logger.info("[%s] Wrote misc data to -> %s", 
                     ctx.blob_name, ctx.exported_misc_excel_path)
     except (ValueError, KeyError, TypeError) as e:
             logger.error(
                 "[%s] Failed to build or save misc workbook. Error: %s",
                 ctx.blob_name, str(e)
-            )    
-        
+            )
+
+
+
+# --------------------------------------------------------------------------
+# Stage: extract "Schedule of Quantity" from just the last config.SOQ_LAST_PAGES
+# pages - kept separate from stage_extract_tender_misc_data (see
+# tender_soq_extract_service.py for why: it lives in a predictable spot near
+# the end of the document, so a narrow, focused call is cheaper and less
+# prone to misclassifying unrelated content than scanning the whole thing).
+# --------------------------------------------------------------------------
+def stage_extract_schedule_of_quantity(ctx: PipelineContext) -> None:
+    pages = _get_pages(ctx)
+    last_pages = pages[-config.SOQ_LAST_PAGES:]
+
+    try:
+        ctx.extracted_soq_data = tender_soq_extract_service.extract_data(
+            last_pages, token_callback=lambda n: _accumulate_tokens(ctx, n)
+        )
+        _save_json(ctx.job_audit_path("soq.json"), ctx.extracted_soq_data)
+
+    except ValueError:
+        logger.warning("[%s] Schedule of Quantity not found", ctx.blob_name)
+
+
+# --------------------------------------------------------------------------
+# Stage: Export the Schedule of Quantity data to excel
+# --------------------------------------------------------------------------
+def stage_export_schedule_of_quantity(ctx: PipelineContext) -> None:
+    data = ctx.extracted_soq_data
+
+    if not data:
+        logger.warning("[%s] No extracted Schedule of Quantity data found in context. Skipping export.",
+                       ctx.blob_name
+        )
+        return
+
+    try:
+        tender_soq_export_excel.export_extraction_to_excel(data, ctx.exported_soq_excel_path)
+        logger.info("[%s] Wrote schedule of quantity data to -> %s",
+                    ctx.blob_name, ctx.exported_soq_excel_path)
+    except (ValueError, KeyError, TypeError) as e:
+        logger.error(
+            "[%s] Failed to build or save schedule of quantity workbook. Error: %s",
+            ctx.blob_name, str(e)
+        )
 
 
 # --------------------------------------------------------------------------
@@ -246,6 +297,7 @@ def stage_consolidate_all_excels(ctx: PipelineContext) -> None:
     input_files = [
         (ctx.clean_nit_excel_path, "NIT Data"),
         (ctx.exported_misc_excel_path, None),
+        (ctx.exported_soq_excel_path, None),
     ]
     
     existing_files = [(p, override) for p, override in input_files if p.exists()]
@@ -295,14 +347,18 @@ def stage_consolidate_all_excels(ctx: PipelineContext) -> None:
 # --------------------------------------------------------------------------
 def stage_add_page_usage_report(ctx: PipelineContext) -> None:
     if not ctx.consolidated_excel_path.exists():
-        logger.warning("[%s] No consolidated excel found, skipping page usage report.", ctx.blob_name)
+        logger.warning("[%s] No consolidated excel found, skipping page usage report.",
+                       ctx.blob_name
+        )
         return
 
     try:
         wb = openpyxl.load_workbook(ctx.consolidated_excel_path)
         page_usage_report.add_usage_sheet(wb, ctx)
         wb.save(ctx.consolidated_excel_path)
-        logger.info("[%s] Added page usage report sheet -> %s", ctx.blob_name, ctx.consolidated_excel_path)
+        logger.info("[%s] Added page usage report sheet -> %s",
+                    ctx.blob_name, ctx.consolidated_excel_path
+        )
     except (ValueError, KeyError, TypeError, OSError) as e:
         logger.error(
             "[%s] Failed to add page usage report sheet. Error: %s",

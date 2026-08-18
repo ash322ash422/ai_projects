@@ -27,6 +27,7 @@ those for `$env:VAR = "value"`, `$env:VAR`, and backtick continuation.
 
 Pick names once and reuse them everywhere below. `STORAGE_ACCOUNT` must be
 **globally unique** (lowercase, 3–24 chars) — change it if it's taken.
+## NOTE: All following  commands need to be run in  cmd.exe shell, not powershell
 
 ```bash
 set RESOURCE_GROUP=tender
@@ -231,15 +232,25 @@ origin, so cross-origin rules don't apply here.)
 
 ---
 
-## 7. Pushing a code change later
+## 7. Pushing a code change later 
 
 Every time you edit backend code:
 
+### NOTE: Make sure Docker Desktop Engine is running
+
+### NOTE: All following commands need to be run in cmd.exe shell, not powershell
+
+
 ```bash
 docker build -t %ACR_NAME%.azurecr.io/tenderextractor-backend:latest ./backend
+
 az acr login --name %ACR_NAME%
+
 docker push %ACR_NAME%.azurecr.io/tenderextractor-backend:latest
+
 az containerapp update --resource-group %RESOURCE_GROUP% --name %BACKEND_APP% --image %ACR_NAME%.azurecr.io/tenderextractor-backend:latest
+
+
 ```
 
 Same pattern for the frontend, swapping the app/image names.
@@ -247,11 +258,46 @@ Same pattern for the frontend, swapping the app/image names.
 ```bash
 
 docker build -t %ACR_NAME%.azurecr.io/tenderextractor-frontend:latest ./frontend
+
 az acr login --name %ACR_NAME%
+
 docker push %ACR_NAME%.azurecr.io/tenderextractor-frontend:latest
+
 az containerapp update --resource-group %RESOURCE_GROUP% --name %FRONTEND_APP% --image %ACR_NAME%.azurecr.io/tenderextractor-frontend:latest
 
 ```
+
+### To check status/watch it roll out
+
+```bash
+az containerapp revision list --resource-group %RESOURCE_GROUP% --name %FRONTEND_APP% -o table
+```
+
+Look for the newest revision with Active: True and TrafficWeight: 100. If it's stuck at 0% traffic or not Active, that usually means the new container failed to start (bad image, crash on boot) — worth checking logs:
+
+
+### Viewing Logs
+
+```bash
+az containerapp logs show --resource-group %RESOURCE_GROUP% --name %FRONTEND_APP% --tail 50
+```
+
+
+### Forcing a restart of container if it does not get updated:
+
+1. Get the current revision name:
+   
+```bash
+az containerapp revision list --resource-group %RESOURCE_GROUP% --name %BACKEND_APP% -o table
+```
+
+This prints a table — copy the value under the Name column (something like tenderextractor-backend--xxxxxxx).
+
+2. Restart that revision:
+ 
+```bash
+az containerapp revision restart --resource-group %RESOURCE_GROUP% --name %BACKEND_APP% --revision <paste-the-name-here>
+
 
 
 

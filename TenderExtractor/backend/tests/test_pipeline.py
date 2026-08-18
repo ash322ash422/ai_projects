@@ -5,7 +5,7 @@ credentials: prompt building, LLM-result merging, and field validation.
 Run with:
     pytest tests/
 """
-from app.services.nit_data_service import merge_results
+from app.services.tender_nit_extract_service import merge_results
 from app.services.prompt import FIELDS_TO_EXTRACT, build_extraction_prompt
 from app.services.validation import validate_amount, validate_date, validate_nit_extracted_json
 

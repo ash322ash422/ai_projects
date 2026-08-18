@@ -41,7 +41,13 @@ class PipelineContext:
     validated_nit_data: Optional[dict] = None   # normalized + valid-flagged fields
 
 
-    extracted_misc_data: Optional[dict] = None   # raw field values: Terms/Condtions, Accpetable Make and List of documents to be scanned /uploaded
+    # raw field values: Terms/Condtions, Accpetable Make, List of documents to be scanned /uploaded, etc.
+    extracted_misc_data: Optional[dict] = None
+
+    # raw Schedule of Quantity data - extracted separately from the last
+    # config.SOQ_LAST_PAGES pages, not part of extracted_misc_data (see
+    # tender_soq_extract_service.py)
+    extracted_soq_data: Optional[dict] = None
 
     token_count: int = 0
     ocr_page_count: int = 0  # pages actually sent to Document Intelligence (0 on a cache hit)
@@ -94,6 +100,10 @@ class PipelineContext:
     @property
     def exported_misc_excel_path(self) -> Path:
         return self.job_output_dir / f"{self.base_name}.misc.xlsx"
+
+    @property
+    def exported_soq_excel_path(self) -> Path:
+        return self.job_output_dir / f"{self.base_name}.soq.xlsx"
 
     @property
     def consolidated_excel_path(self) -> Path:
